@@ -15,58 +15,8 @@ grc tail -fn+1 /var/log/cloud-init-output.log
 sudo passwd root
 sudo passwd __REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_USERNAME__
 
-## Don't enter a password because we'll enter one later, even though it asks three times
-sudo apt install -y mariadb-server php-mysql
-
-## Secure the mysql installation
-## Steps for the following task
-## 1) supply mysql root password
-## 2) change root password? N
-## 3) remove anonymous users? Y
-## 4) disallow remote root login? Y
-## 5) remove test database and access? Y
-## 6) reload privilege database? Y
-sudo mysql_secure_installation
-
-mysql -u root -p
-CREATE DATABASE __mysql_db_name__ CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci;
-CREATE USER '__mysql_user_name__'@'localhost' IDENTIFIED BY '__mysql_user_password__';
-GRANT ALL PRIVILEGES ON __mysql_db_name__.* TO '__mysql_user_name__'@'localhost';
-FLUSH PRIVILEGES;
-exit;
-
-sudo sed -i -e 's/__username__/__REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_USERNAME__/' /etc/nginx/sites-available/__REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_DOMAIN__
-sudo sed -i -e 's/__domain.tld__/__REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_DOMAIN__/' /etc/nginx/sites-available/__REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_DOMAIN__
-
-## Test the new nginx config
-sudo nginx -t
-## Start nginx
-sudo service nginx start
-## Start PHP (in case it hasn't started yet)
-sudo service php7.2-fpm start
-
-## Install and configure sendmail
-## This command will take a long time and appear to freeze
-## You may even need to bail out of it and run some things manually
-## https://askubuntu.com/questions/937666/ubuntu-16-04-command-line-sendmail-installation-hanged
-sudo apt install -yq sendmail sendmail-bin
-
-# Configure with existing? Y
-# Configure with existing? Y
-# Reload? Y
-sudo sendmailconfig
-
 ## Install zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" && chsh -s /bin/zsh
-
-## UPDATE DNS FOR SITE DOMAINS TO IP ADDRESS OF NEW SERVER
-
-## Run certbot for all domains:
-## (this should be done only after we have updated the site's DNS to point to the new IP address)
-sudo certbot certonly --email __REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_EMAIL__ --agree-tos --webroot -w /home/__REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_USERNAME__/www/__REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_DOMAIN__/public -d __REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_DOMAIN__
-
-## Activate HTTPS
-sudo sed -i -e 's/# listen 443 ssl http2;/listen 443 ssl http2;/' /etc/nginx/sites-available/__REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_DOMAIN__ && sudo sed -i -e 's/# listen 443 ssl http2;/listen 443 ssl http2;/' /etc/nginx/sites-available/__REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_DOMAIN__ && sudo sed -i -e 's/# listen \[::\]:443 ssl http2;/listen \[::\]:443 ssl http2;/' /etc/nginx/sites-available/__REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_DOMAIN__ && sudo sed -i -e 's/# listen \[::\]:443 ssl http2;/listen \[::\]:443 ssl http2;/' /etc/nginx/sites-available/__REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_DOMAIN__ && sudo sed -i -e 's/# ssl_certificate /ssl_certificate /' /etc/nginx/sites-available/__REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_DOMAIN__ && sudo sed -i -e 's/# ssl_certificate_key /ssl_certificate_key /' /etc/nginx/sites-available/__REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_DOMAIN__ && sudo sed -i -e 's/# ssl_certificate /ssl_certificate /' /etc/nginx/sites-available/__REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_DOMAIN__ && sudo sed -i -e 's/# ssl_certificate_key /ssl_certificate_key /' /etc/nginx/sites-available/__REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_DOMAIN__ && sudo service nginx restart
 
 ## Reboot the system
 sudo reboot
@@ -95,6 +45,4 @@ sudo chattr +i /etc/hostname
 #############################
 ## __REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_SERVER_IP__ - the IP address Digital Ocean assigned to your server
 ## __REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_USERNAME__ - the username of the primary admin user that will be created on the server (e.g. dane)
-## __REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_EMAIL__ - the email address of the primary admin user
-## __REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_DOMAIN__ - the domain for your website that will be hosted by nginx (e.g. thegreatsunra.com)
 ## __REPLACE_THIS_TEXT_WITH_YOUR_ACTUAL_SERVER_DOMAIN_NAME__ - the domain for your server (e.g. swearengen.thegreatsunra.com)
